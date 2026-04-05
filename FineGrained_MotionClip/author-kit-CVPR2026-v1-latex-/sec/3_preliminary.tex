@@ -1,0 +1,58 @@
+
+\section{Preliminary}
+\subsection{Optimal Transport}
+Optimal Transport (OT)~\cite{solomon2018optimal} provides a principled framework for measuring the
+discrepancy between two distributions while explicitly accounting for the
+underlying geometry. Assume two uniform discrete distributions $\mathbf{a}$ and $\mathbf{b}$, supported on $T_m$ and $T_t$ elements, respectively. We denote the set of admissible transport plans by
+\begin{equation}
+\label{eq:P_constraint}
+U(\mathbf{a},\mathbf{b})=
+\left\{
+\mathbf{P} \in \mathbb{R}_+^{T_m \times T_t}
+\;\middle|\;
+\mathbf{P}\mathbf{1}_{T_t}=\mathbf{a},\;
+\mathbf{P}^\top \mathbf{1}_{T_m}=\mathbf{b}
+\right\},
+\end{equation}
+where
+\begin{equation}
+\mathbf{a}=\frac{1}{T_m}\mathbf{1}_{T_m},
+\qquad
+\mathbf{b}=\frac{1}{T_t}\mathbf{1}_{T_t}.
+\end{equation}
+
+The marginal constraints ensure that $\mathbf{P}$ redistributes the mass of $\mathbf{a}$ onto $\mathbf{b}$.
+Given a cost matrix $\mathbf{C}\in\mathbb{R}^{T_m\times T_t}$ measuring the cost of
+transporting unit mass between elements, the Kantorovich formulation of OT is
+defined as
+\begin{equation}
+\label{eq:ot_kantorovich}
+\min_{\mathbf{P}\in{U}(\mathbf{a},\mathbf{b})}
+\ \langle \mathbf{P},\mathbf{C}\rangle
+\end{equation}
+where $\langle \mathbf{P},\mathbf{C}\rangle=\sum_{i,j}\mathbf{P}_{ij}\mathbf{C}_{ij}$.
+
+In contrast to pointwise matching, OT naturally supports many-to-many
+correspondence and enforces global consistency via marginal constraints.
+These properties make OT particularly suitable for modeling fine-grained
+alignment under weak supervision, such as motion--text correspondence.
+
+\subsection{Entropic-Regularized Optimal Transport and Sinkhorn Algorithm}
+\label{sec:entro}
+
+Directly solving \cref{eq:ot_kantorovich} requires linear programming, which is
+computationally expensive and unsuitable for end-to-end learning.
+To address this issue, entropic regularization augments the OT objective with an
+entropy term:
+\begin{equation}
+\label{eq:entropic_ot}
+\begin{aligned}
+\mathbf{P}^* = \arg\min_{\mathbf{P}\in{U}(\mathbf{a},\mathbf{b})}
+\ & \langle \mathbf{P},\mathbf{C}\rangle
+\;+\;
+\varepsilon
+\sum_{i,j}{P}_{ij}\big(\log{P}_{ij}-1\big)
+\end{aligned}
+\end{equation}
+where $\varepsilon>0$ controls the strength of the regularization. The entropic regularization renders the problem strictly convex and enables efficient optimization via the Sinkhorn algorithm.
+%As a result, entropic OT can be seamlessly integrated as a loss function or alignment module in deep learning models.

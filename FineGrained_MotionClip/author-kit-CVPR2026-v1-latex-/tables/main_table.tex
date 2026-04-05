@@ -1,0 +1,47 @@
+
+\begin{table*}[t]
+\centering
+\caption{Quantitative results. Values are reported in normalized $\ell_1$ distance ($\times 10^{-2}$), where lower is better. GF indicates whether to use the global feature. MLP Enc. determines whether to use an MLP-based text encoder or a self-attention-based text encoder.} 
+\label{tab:alignment_results}
+\begin{tabular}{lcccc}
+\toprule
+Method & GF & MLP Enc. & temperature & Normalized $\ell_1 \downarrow$ \\
+\midrule
+
+Stepwise Uniform Baseline & & & & 0.347 \\
+VLM Baseline (GPT-5.2) & & & & 0.296 \\
+
+\midrule
+Ours (GF + MLP encoder) & \checkmark & \checkmark & 0.07 & \textbf{0.225} \\
+Ours (GF + MLP encoder) & \checkmark & \checkmark& 0.01 & 0.230 \\
+Ours (GF + MLP encoder) & \checkmark & \checkmark& 0.03 & 0.237 \\
+Ours (GF + attention encoder) & \checkmark  & $\times$ & 0.07 & 0.275 \\
+Ours (MLP encoder) & $\times$ & \checkmark & 0.07& 0.239 \\
+
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+% \begin{table*}[t]
+% \centering
+% \caption{Quantitative results. Values are reported in normalized $\ell_1$ distance ($\times 10^{-2}$), where lower is better. GF indicates whether to use the global feature. MLP Enc. determines whether to use an MLP-based text encoder or a self-attention-based text encoder.} 
+% \label{tab:alignment_results_temp}
+% \begin{tabular}{lccc}
+% \toprule
+% Method & GF & MLP Enc. & Normalized $\ell_1 \downarrow$ \\
+% \midrule
+
+% Stepwise Uniform Baseline & & & 0.347 \\
+% VLM Baseline (GPT-5.2) & & & 0.296 \\
+
+% \midrule
+% Ours (GF + MLP encoder, temp = $0.07$) & \checkmark & \checkmark & \textbf{0.225} \\
+% Ours (GF + MLP encoder, temp = $0.01$) & \checkmark & \checkmark & 0.230 \\
+% Ours (GF + MLP encoder, temp = $0.03$) & \checkmark & \checkmark & 0.237 \\
+% Ours (GF + attention encoder) & \checkmark  & $\times$  & 0.275 \\
+% Ours (MLP encoder) & $\times$ & \checkmark & 0.239 \\
+
+% \bottomrule
+% \end{tabular}
+% \end{table*}

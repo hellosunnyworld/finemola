@@ -1,0 +1,277 @@
+
+\section{Theoretic Results}
+\label{sec:expressiveness}
+
+\paragraph{Setup.}
+Let a motion sample be represented by segment features
+$\{f_{m_i}\}_{i=1}^m \subset \mathbb{R}^d$
+and a text sample by token features
+$\{f_{t_j}\}_{j=1}^n \subset \mathbb{R}^d$.
+Define the pairwise similarity matrix
+$C\in\mathbb{R}^{m\times n}$ by
+\[
+C_{ij}
+\;=\;
+\langle f_{m_i}, f_{t_j}\rangle .
+\]
+Let the uniform marginals be
+$\mu = \frac{1}{m}\mathbf{1}_m$
+and
+$\nu = \frac{1}{n}\mathbf{1}_n$,
+and define the transport polytope
+\[
+\Pi(\mu,\nu)
+=
+\left\{
+\pi\in\mathbb{R}_+^{m\times n}
+\;\middle|\;
+\begin{aligned}
+\pi\mathbf{1}_n &= \mu, \\
+\pi^\top \mathbf{1}_m &= \nu
+\end{aligned}
+\right\}.
+\]
+
+\begin{theorem}[OT dominates mean-pooling CLIP score]
+\label{thm:ot_ge_mean}
+Assume CLIP aggregates segment/token features by mean pooling:
+\[
+F_M=\frac{1}{m}\sum_{i=1}^m f_{m_i},
+\qquad
+F_T=\frac{1}{n}\sum_{j=1}^n f_{t_j},
+\]
+and uses the global score
+\[
+R_{\mathrm{CLIP}}
+\;=\;
+\langle F_M, F_T\rangle .
+\]
+Define the OT reward (fine-grained score) as
+\[
+\begin{aligned}
+R_{\mathrm{OT}}
+&=
+\max_{\pi\in\Pi(\mu,\nu)}
+\;\langle \pi, C\rangle \\
+&=
+\max_{\pi\in\Pi(\mu,\nu)}
+\sum_{i=1}^m
+\sum_{j=1}^n
+\pi_{ij} C_{ij}.
+\end{aligned}
+\]
+Then for any fixed features,
+\[
+R_{\mathrm{OT}}
+\;\ge\;
+R_{\mathrm{CLIP}}.
+\]
+Equivalently, defining costs by
+$d_{ij}=-C_{ij}$ and
+\[
+\mathrm{Cost}_{\mathrm{OT}}
+=
+\min_{\pi\in\Pi(\mu,\nu)}
+\langle \pi, d\rangle ,
+\]
+we have
+\[
+\mathrm{Cost}_{\mathrm{OT}}
+\;\le\;
+\langle U, d\rangle ,
+\qquad
+U_{ij}=\frac{1}{mn},
+\]
+i.e., OT achieves a cost no larger than the
+mean-pooling induced plan.
+\end{theorem}
+
+\begin{proof}
+By bilinearity,
+\[
+\begin{aligned}
+R_{\mathrm{CLIP}}
+&=
+\left\langle
+\frac{1}{m}\sum_{i=1}^m f_{m_i},
+\frac{1}{n}\sum_{j=1}^n f_{t_j}
+\right\rangle \\
+&=
+\frac{1}{mn}
+\sum_{i=1}^m
+\sum_{j=1}^n
+\langle f_{m_i}, f_{t_j}\rangle \\
+&=
+\sum_{i=1}^m
+\sum_{j=1}^n
+U_{ij} C_{ij}
+=
+\langle U, C\rangle ,
+\end{aligned}
+\]
+where $U\in\mathbb{R}^{m\times n}$ is defined by
+$U_{ij}=\frac{1}{mn}$.
+
+We verify feasibility.
+For each $i$,
+\[
+\sum_{j=1}^n U_{ij}
+=
+n\cdot\frac{1}{mn}
+=
+\frac{1}{m}
+=
+\mu_i,
+\]
+and for each $j$,
+\[
+\sum_{i=1}^m U_{ij}
+=
+m\cdot\frac{1}{mn}
+=
+\frac{1}{n}
+=
+\nu_j.
+\]
+Hence $U\in\Pi(\mu,\nu)$.
+
+Since
+$R_{\mathrm{OT}}
+=
+\max_{\pi\in\Pi(\mu,\nu)}
+\langle \pi, C\rangle$
+and $U$ is feasible,
+\[
+R_{\mathrm{OT}}
+\;\ge\;
+\langle U, C\rangle
+=
+R_{\mathrm{CLIP}}.
+\]
+The cost-form statement follows by
+$d=-C$ and
+\[
+\min_{\pi}\langle \pi, d\rangle
+=
+-\max_{\pi}\langle \pi, C\rangle .
+\]
+\end{proof}
+
+\paragraph{Frozen-encoder retrieval setting.}
+Let the training set be
+$\mathcal{D}=\{(M_i,T_i)\}_{i=1}^N$.
+Fix (freeze) the encoders, so for any pair $(M,T)$
+the feature sets and
+$C(M,T)$ are deterministic.
+
+Given a score function $S(M,T)$,
+define top-1 retrieval by
+\[
+\begin{aligned}
+\widehat{T}(M_q)
+&=
+\arg\max_{T_k\in\{T_1,\dots,T_N\}}
+S(M_q,T_k), \\
+\mathrm{Acc}(S;\mathcal{D})
+&=
+\frac{1}{N}
+\sum_{q=1}^N
+\mathbf{1}\{\widehat{T}(M_q)=T_q\}.
+\end{aligned}
+\]
+
+Let the CLIP (mean-pooling) score be
+\[
+S_{\mathrm{mean}}(M,T)
+=
+\langle U, C(M,T)\rangle .
+\]
+Consider the fine-grained (transport) family
+\[
+\mathcal{H}_{\mathrm{OT}}
+=
+\left\{
+S_{\pi}(M,T)
+=
+\langle \pi, C(M,T)\rangle
+\;\middle|\;
+\pi\in\Pi(\mu,\nu)
+\right\}.
+\]
+Note that
+$\mathcal{H}_{\mathrm{OT}}$
+includes the mean-pooling scorer since
+$U\in\Pi(\mu,\nu)$.
+
+\begin{theorem}[Fine-grained OT family has no worse achievable training retrieval accuracy]
+\label{thm:acc_superset}
+With frozen encoders and a fixed dataset
+$\mathcal{D}$,
+\[
+\max_{S\in\mathcal{H}_{\mathrm{OT}}}
+\mathrm{Acc}(S;\mathcal{D})
+\;\ge\;
+\mathrm{Acc}(S_{\mathrm{mean}};\mathcal{D}).
+\]
+Moreover, if there exists a query $M_q$
+and a negative $T_k\neq T_q$ such that
+\[
+S_{\mathrm{mean}}(M_q,T_k)
+=
+S_{\mathrm{mean}}(M_q,T_q),
+\]
+but there exists
+$\pi^\star\in\Pi(\mu,\nu)$
+with
+\[
+S_{\pi^\star}(M_q,T_q)
+>
+S_{\pi^\star}(M_q,T_k),
+\]
+then the inequality is strict:
+\[
+\max_{S\in\mathcal{H}_{\mathrm{OT}}}
+\mathrm{Acc}(S;\mathcal{D})
+\;>\;
+\mathrm{Acc}(S_{\mathrm{mean}};\mathcal{D}).
+\]
+\end{theorem}
+
+\begin{proof}
+Since $U\in\Pi(\mu,\nu)$,
+we have
+$S_{\mathrm{mean}} = S_U \in \mathcal{H}_{\mathrm{OT}}$.
+Therefore,
+\[
+\max_{S\in\mathcal{H}_{\mathrm{OT}}}
+\mathrm{Acc}(S;\mathcal{D})
+\;\ge\;
+\mathrm{Acc}(S_U;\mathcal{D})
+=
+\mathrm{Acc}(S_{\mathrm{mean}};\mathcal{D}).
+\]
+
+For strictness,
+assume there exists $(q,k)$ such that
+\[
+S_{\mathrm{mean}}(M_q,T_k)
+=
+S_{\mathrm{mean}}(M_q,T_q),
+\]
+but some
+$\pi^\star$
+satisfies
+\[
+S_{\pi^\star}(M_q,T_q)
+>
+S_{\pi^\star}(M_q,T_k).
+\]
+Under $S_{\pi^\star}$,
+the positive ranks above the negative for query $M_q$,
+resolving at least one ambiguity
+that mean pooling cannot.
+Hence there exists a scorer in
+$\mathcal{H}_{\mathrm{OT}}$
+with strictly higher top-1 accuracy on
+$\mathcal{D}$.
+\end{proof}
