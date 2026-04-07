@@ -1,2 +1,2 @@
-Website for Open X-Embodiment: Robotic Learning Datasets and RT-X Models
-# robotics-transformer-x.github.io
+Website for FineMoLA: Towards Fine-Grained Motion-Language Alignment from Clip-Level Supervision
+# finemola.github.io
